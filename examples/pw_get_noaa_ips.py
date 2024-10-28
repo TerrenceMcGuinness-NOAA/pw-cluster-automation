@@ -26,6 +26,7 @@ import requests
 import json
 import os
 import sys
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
 from pycookiecheat import chrome_cookies
 from tabulate import tabulate
@@ -36,6 +37,16 @@ keyfile = homedir + '/.ssh/pw_api.key'
 
 cluster_hosts = []
 clusters = []
+owned_clusters = []
+
+def input_args():
+    parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
+    parser.add_argument('--output_json', help='Print full json response to screen',action='store_true', required=False)
+    parser.add_argument('--owner', help='Print pw systems by owner', type=str, required=False)
+    args = parser.parse_args()
+    return args
+
+args = input_args()
 
 try:
   f = open(keyfile, "r")
@@ -55,9 +66,18 @@ json_data = json.loads(response.text)
 
 dic_entry = {}
 if response:
-  #print ("Connection successful")
-  #print(json.dumps(data,indent=4))
+  if args.output_json:
+      print(json.dumps(json_data,indent=4))
+      sys.exit(0)
+  print ("Connection successful\n")
   for cluster in json_data:
+    if args.owner:
+      if cluster["namespace"] != args.owner:
+        continue
+      if cluster["status"] == "on":
+        cluster["status"] = cluster["state"]["masterNode"]
+      owned_clusters.append([cluster["namespace"], cluster["status"], cluster["id"], cluster["displayName"]])
+
     if "masterNode" in cluster["state"]:
       display_name = cluster['displayName']
       name = cluster['name']
@@ -66,14 +86,19 @@ if response:
       entry = ' '.join([name, ip])
       clusters.append([display_name, owner, ip])
       cluster_hosts.append(entry)
-  print (tabulate(clusters,headers=["Full Name","Owner","IP"]))
-  print()
+
+  if args.owner:
+    print (tabulate(owned_clusters,headers=["Owner","Status","ID","Name"]))
+    print()
+  else:  
+    print (tabulate(clusters,headers=["Full Name","Owner","IP"]))
+    print()
   
   # Generate the user's local .hosts file
-  with open(hostsfile, 'w+') as f:
-    f.writelines("%s\n" % l for l in cluster_hosts)
-    print('SUCCESS - the', hostsfile, 'was updated.')
-  f.close() 
+  #with open(hostsfile, 'w+') as f:
+  #  f.writelines("%s\n" % l for l in cluster_hosts)
+  #  print('SUCCESS - the', hostsfile, 'was updated.')
+  #f.close() 
   
 else:
   print ("Connection unsuccessful - can't connect to Parallel Works NOAA gateway")
