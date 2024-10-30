@@ -85,6 +85,8 @@ for cluster_name in clusters_to_start:
 
     print("\nChecking cluster status", cluster_name+"...")
 
+    started = []
+
     # check if resource exists and is on
     # find cluster_name in my_clusters
     cluster = next(
@@ -97,6 +99,11 @@ for cluster_name in clusters_to_start:
             print(c.start_resource(cluster['id']))
         else:
             print(cluster_name, "already running...")
+            ip = cluster['controllerIp']
+            entry = ' '.join([cluster['name'], ip])
+            print(entry)
+            cluster_hosts.append(entry)
+            started.append(cluster['name'])
     else:
         print("No cluster found.")
         sys.exit(1)
@@ -104,7 +111,6 @@ for cluster_name in clusters_to_start:
 print("\nWaiting for", len(clusters_to_start), "cluster(s) to start...")
 
 laststate = {}
-started = []
 
 while True:
 
@@ -112,7 +118,6 @@ while True:
 
     for cluster in current_state:
 
-        # print(cluster['name'],cluster['status'])
 
         if cluster['name'] in clusters_to_start and cluster['status'] == 'on':
 
@@ -178,3 +183,4 @@ for ei, entry in enumerate(cluster_hosts):
             shell=True).decode(sys.stdout.encoding)
 
         print(out)
+

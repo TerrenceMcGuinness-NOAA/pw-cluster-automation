@@ -31,6 +31,8 @@ from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from pycookiecheat import chrome_cookies
 from tabulate import tabulate
 
+import pycookiecheat
+
 homedir = os.environ['HOME']
 hostsfile = homedir + '/.hosts'
 keyfile = homedir + '/.ssh/pw_api.key'
@@ -60,7 +62,8 @@ except IOError:
 url_resources = "https://noaa.parallel.works/api/resources?key=" + my_key
 url = "https://noaa.parallel.works"
 
-cookies = chrome_cookies(url, cookie_file='/home/tmcguinness/.config/chromium/Default/Cookies')
+cookies = pycookiecheat.firefox_cookies(url)
+#cookies = chrome_cookies(url, cookie_file='/home/tmcguinness/.config/chromium/Default/Cookies')
 response = requests.get(url_resources, cookies=cookies)
 json_data = json.loads(response.text)
 
@@ -76,19 +79,21 @@ if response:
         continue
       if cluster["status"] == "on":
         cluster["status"] = cluster["state"]["masterNode"]
-      owned_clusters.append([cluster["namespace"], cluster["status"], cluster["id"], cluster["displayName"]])
+      owned_clusters.append([cluster["namespace"], cluster["status"], cluster["id"], cluster["displayName"], cluster["name"]])
 
     if "masterNode" in cluster["state"]:
       display_name = cluster['displayName']
       name = cluster['name']
       owner = cluster['namespace']
       ip = cluster['state']['masterNode'] 
+      if ip is None:
+          ip = "None yet"
       entry = ' '.join([name, ip])
       clusters.append([display_name, owner, ip])
       cluster_hosts.append(entry)
 
   if args.owner:
-    print (tabulate(owned_clusters,headers=["Owner","Status","ID","Name"]))
+    print (tabulate(owned_clusters,headers=["Owner","Status","ID","Display Name","Name"]))
     print()
   else:  
     print (tabulate(clusters,headers=["Full Name","Owner","IP"]))
