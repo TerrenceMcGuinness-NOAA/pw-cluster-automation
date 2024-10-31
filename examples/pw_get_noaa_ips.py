@@ -79,7 +79,7 @@ if response:
         continue
       if cluster["status"] == "on":
         cluster["status"] = cluster["state"]["masterNode"]
-      owned_clusters.append([cluster["namespace"], cluster["status"], cluster["id"], cluster["displayName"], cluster["name"]])
+      owned_clusters.append([cluster["namespace"], cluster["status"], cluster["displayName"], cluster["name"]])
 
     if "masterNode" in cluster["state"]:
       display_name = cluster['displayName']
@@ -93,7 +93,7 @@ if response:
       cluster_hosts.append(entry)
 
   if args.owner:
-    print (tabulate(owned_clusters,headers=["Owner","Status","ID","Display Name","Name"]))
+    print (tabulate(owned_clusters,headers=["Owner","Status","Display Name","Name"]))
     print()
   else:  
     print (tabulate(clusters,headers=["Full Name","Owner","IP"]))
