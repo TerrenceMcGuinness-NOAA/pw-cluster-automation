@@ -171,7 +171,7 @@ for ei, entry in enumerate(cluster_hosts):
         name = entry.split()[0]
         ip = entry.split()[1]
 
-        cmd = "ssh -v -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null %s@%s %s" % (
+        cmd = "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null %s@%s %s" % (
             user, ip, testcmd)
 
         print("")
