@@ -44,6 +44,7 @@ owned_clusters = []
 def input_args():
     parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument('--output_json', help='Print full json response to screen',action='store_true', required=False)
+    parser.add_argument('--get_cluster', help='Print pw systems by owner', type=str, required=False)
     parser.add_argument('--owner', help='Print pw systems by owner', type=str, required=False)
     args = parser.parse_args()
     return args
@@ -72,8 +73,11 @@ if response:
   if args.output_json:
       print(json.dumps(json_data,indent=4))
       sys.exit(0)
-  print ("Connection successful\n")
   for cluster in json_data:
+    if args.get_cluster:
+      if cluster["name"] == args.get_cluster:
+         print(json.dumps(cluster, indent=4))
+         sys.exit(0)
     if args.owner:
       if cluster["namespace"] != args.owner:
         continue
